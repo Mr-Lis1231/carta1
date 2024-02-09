@@ -14,7 +14,7 @@ import requests
 class WordTrick(QWidget):
     def __init__(self):
         super().__init__()
-        self.x = 70
+        self.x = 10
         self.map()
 
         self.setGeometry(800, 800, 800, 800)
@@ -24,11 +24,11 @@ class WordTrick(QWidget):
         self.pix.move(0, 0)
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Up:
-            self.x -= 5
+            self.x -= 1
             self.map()
             self.map_update()
         elif event.key() == Qt.Key_Down:
-            self.x += 5
+            self.x += 1
             self.map()
             print('down', self.x)
             self.map_update()
@@ -38,19 +38,26 @@ class WordTrick(QWidget):
         self.pix.move(0, 0)
 
     def map(self):
-        map_request = f"http://static-maps.yandex.ru/1.x/?ll=30.530887,20.703118&spn={self.x},5.2&l=map"
-        response = requests.get(map_request)
+
+        toponym_longitude, toponym_lattitude = '37.530887', '55.703118'
+        delta = "0.005"
+        map_params = {
+            "ll": ",".join([toponym_longitude, toponym_lattitude]),
+            "l": "map",
+            'z': f'{self.x}'
+        }
+        map_api_server = "http://static-maps.yandex.ru/1.x/"
+        # ... и выполняем запрос
+        response = requests.get(map_api_server, params=map_params)
 
         if not response:
             print("Ошибка выполнения запроса:")
-            print(map_request)
             print("Http статус:", response.status_code, "(", response.reason, ")")
             sys.exit(1)
 
         map_file = "map.png"
         with open(map_file, "wb") as file:
             file.write(response.content)
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
